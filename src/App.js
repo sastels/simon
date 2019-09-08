@@ -33,13 +33,51 @@ const SimonButton = props => {
   )
 }
 
+const newRound = roundLength => {
+  const items = ['A', 'B', 'C', 'D']
+  const roundSequence = [...Array(roundLength)]
+    .map(() => items.splice(Math.floor(Math.random() * items.length), 1)[0])
+    .join('')
+  console.log(roundSequence)
+  return roundSequence
+}
+
 const App = () => {
   const [score, setScore] = useState(0)
   const [bestScore, setBestScore] = useState(0)
+  const [sequence, setSequence] = useState('A')
+  const [userSequence, setUserSequence] = useState('')
 
   const pressButton = letter => {
-    setBestScore(letter)
-    setScore(score + 1)
+    console.log(`pressed ${letter}`)
+    const newUserSequence = userSequence.concat(letter)
+
+    console.log(`seq ${sequence}`)
+    console.log(`usr ${newUserSequence}`)
+
+    if (sequence.slice(0, newUserSequence.length) === newUserSequence) {
+      console.log('-- 1 --')
+      if (sequence.length === newUserSequence.length) {
+        console.log('-- 1 1 --')
+        // won this round
+        const newScore = sequence.length
+        setBestScore(Math.max(newScore, bestScore))
+        const nextRound = newRound(newScore + 1)
+        setSequence(nextRound)
+        setScore(newScore)
+        setUserSequence('')
+      } else {
+        console.log('-- 1 2 --')
+        // not done yet
+        setUserSequence(newUserSequence)
+      }
+    } else {
+      console.log('-- 2 --')
+      // lost round
+      setScore(0)
+      setUserSequence('')
+      setSequence(newRound(1))
+    }
   }
 
   return (
