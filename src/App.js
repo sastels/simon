@@ -2,6 +2,13 @@ import React, { useState } from 'react'
 import { Box, Button, Grommet, Heading, Text } from 'grommet'
 import AppBar from './componants/AppBar'
 
+const sounds = {
+  A: new Audio('do.wav'),
+  B: new Audio('re.wav'),
+  C: new Audio('mi.wav'),
+  D: new Audio('fa.wav'),
+}
+
 const theme = {
   global: {
     colors: {
@@ -33,27 +40,36 @@ const SimonButton = props => {
   )
 }
 
-const newRound = roundLength => {
+const flashButton = letter => {
+  sounds[letter].play()
+}
+
+const newRound = seq => {
   const items = ['A', 'B', 'C', 'D']
-  const roundSequence = [...Array(roundLength)]
-    .map(() => items[Math.floor(Math.random() * items.length)])
-    .join('')
+  const newLetter = items[Math.floor(Math.random() * items.length)]
+  const roundSequence = seq.concat(newLetter)
+  roundSequence.split('').forEach((letter, index) => {
+    console.log(`letter: ${letter}`)
+    setTimeout(() => flashButton(letter), (2 + index) * 500)
+  })
   console.log(roundSequence)
   return roundSequence
 }
 
 const App = () => {
   const [bestScore, setBestScore] = useState(0)
-  const [sequence, setSequence] = useState('A')
+  const [sequence, setSequence] = useState(() => newRound(''))
   const [userSequence, setUserSequence] = useState('')
 
   const pressButton = letter => {
+    sounds[letter].play()
+
     const newUserSequence = userSequence.concat(letter)
     if (sequence.slice(0, newUserSequence.length) === newUserSequence) {
       if (sequence.length === newUserSequence.length) {
         // won this round
         setBestScore(Math.max(sequence.length, bestScore))
-        const nextRound = newRound(sequence.length + 1)
+        const nextRound = newRound(sequence)
         setSequence(nextRound)
         setUserSequence('')
       } else {
@@ -62,7 +78,7 @@ const App = () => {
       }
     } else {
       // lost round
-      setSequence(newRound(1))
+      setSequence(newRound(''))
       setUserSequence('')
     }
   }
